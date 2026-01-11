@@ -6,7 +6,7 @@ Built with **Python**, **Textual**, and **yt-dlp**, with a heavy focus on system
 
 ![License](https://img.shields.io/badge/license-MIT-magenta)
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
-![TWICE](https://img.shields.io/badge/dynamic/json?color=FF5FA2&label=Bias&query=$.bias&url=https%3A%2F%2Fraw.githubusercontent.com%2Fonce-tube%2Fonce-tube%2Fmain%2Fmetadata.json)
+![Bias](https://img.shields.io/badge/Bias-Jihyo-pink)
 
 ## ✨ Features
 
