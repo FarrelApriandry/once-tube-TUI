@@ -15,7 +15,6 @@ Screen {
     padding: 1 2;
 }
 
-/* Sidebar Kiri & Kanan */
 #search-area, #controls-area {
     width: 25%;
     border: tall $primary;
@@ -24,7 +23,6 @@ Screen {
     margin: 0 1;
 }
 
-/* Area Tengah (Tabel) */
 #results-area {
     width: 50%;
     border: tall $secondary;
@@ -32,7 +30,6 @@ Screen {
     padding: 1;
 }
 
-/* Header Text di tiap section */
 Static.section-title {
     content-align: center middle;
     width: 100%;
@@ -52,9 +49,9 @@ Input {
 
 Button {
     width: 100%;
-    height: 3;         /* Lock tinggi button sama dengan Input */
+    height: 3;
     margin-bottom: 1;
-    border: tall transparent; /* Reserve space buat border */
+    border: tall transparent;
     color: white;
     text-align: center;
 }
@@ -72,7 +69,6 @@ Button {
     color: black;
 }
 
-/* HOVER STATE - Tidak akan ngerubah ukuran lagi */
 Button:hover {
     border: tall white;
     text-style: bold;
@@ -83,7 +79,6 @@ Button:hover {
     color: white;
 }
 
-/* Tabel Styling */
 DataTable {
     border: solid $primary;
     height: 1fr;
