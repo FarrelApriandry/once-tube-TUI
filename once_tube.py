@@ -36,7 +36,7 @@ class OnceTube(App):
             # Sidebar: Search Input
             with Vertical(id="search-area"):
                 yield Static("SEARCH VIDEOS", classes="section-title")
-                yield Input(placeholder="Type here, Rel...", id="search-input")
+                yield Input(placeholder="Type here...", id="search-input")
                 yield Button("Search", id="search-button")
             
             # Main Content: Results Table
@@ -66,6 +66,11 @@ class OnceTube(App):
             await self.action_play_selected(mode="video")
         elif event.button.id == "play-audio-button":
             await self.action_play_selected(mode="audio")
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle the Enter key press when the search input is focused."""
+        if event.input.id == "search-input":
+            await self.action_perform_search()
 
     async def action_perform_search(self) -> None:
         """Asynchronously fetch search results from YouTube using yt-dlp."""
