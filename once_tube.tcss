@@ -15,12 +15,47 @@ Screen {
     padding: 1 2;
 }
 
-#search-area, #controls-area {
-    width: 25%;
+#search-area {
+    width: 1fr;    /* Ambil 1 bagian */
     border: tall $primary;
     background: #121212;
     padding: 1;
-    margin: 0 1;
+}
+
+#results-area {
+    width: 2fr;    /* Ambil 2 bagian (paling lebar) */
+    border: tall $secondary;
+    background: #121212;
+    padding: 1;
+}
+
+#controls-area {
+    width: 1fr;    /* Ambil 1 bagian */
+    border: tall $primary; 
+    padding: 1;
+}
+
+/* Update Playback Controls biar tombolnya beneran sampingan */
+#playback-controls {
+    height: 3;
+    width: 100%;
+    margin-top: 1;
+    layout: horizontal; /* Pastiin layoutnya horizontal */
+}
+
+#playback-controls Button {
+    width: 1fr;      /* Bagi rata sisa tempat */
+    margin: 0;       /* Hapus margin biar ga tabrakan */
+    height: 100%;
+}
+
+#pause-button {
+    background: $warning;
+    color: black;
+}
+
+#next-button {
+    background: $accent;
 }
 
 #results-area {

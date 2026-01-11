@@ -1,3 +1,4 @@
+from os import sync
 import subprocess
 import asyncio
 from typing import List, Dict
@@ -28,6 +29,9 @@ class OnceTube(App):
     # Internal state for video data and process management
     videos: List[Dict[str, str]] = []
     active_processes: List[subprocess.Popen] = []
+    video_queue: List[Dict[str, str]] = []
+    is_playing: bool = False
+    is_paused: bool = False
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the application."""
@@ -45,11 +49,19 @@ class OnceTube(App):
                 yield Static("Search results will appear here.", id="results-message")
                 yield DataTable(id="video-table")
 
-            # Sidebar: Player Controls
+            # Sidebar: Player Controls & Queue
             with Vertical(id="controls-area"):
                 yield Static("MEDIA PLAYER", classes="section-title")
                 yield Button("▶ Play Video", id="play-video-button")
                 yield Button("♬ Play Audio", id="play-audio-button")
+                yield Button("➕ Add to Queue", id="add-queue-button")
+                
+                yield Static("NEXT IN QUEUE", classes="section-title")
+                yield DataTable(id="queue-table")
+
+                with Horizontal(id="playback-controls"):
+                    yield Button("⏸ Pause", id="pause-button")
+                    yield Button("⏭ Next", id="next-button")
         yield Footer()
 
     async def on_mount(self) -> None:
@@ -58,14 +70,83 @@ class OnceTube(App):
         table.cursor_type = "row"
         table.add_columns("No", "Video Title")
 
+        queue_table = self.query_one("#queue-table", DataTable)
+        queue_table.cursor_type = "row"
+        queue_table.add_columns("No", "Queue Title")
+
     async def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button press events based on their IDs."""
         if event.button.id == "search-button":
             await self.action_perform_search()
         elif event.button.id == "play-video-button":
-            await self.action_play_selected(mode="video")
+            await self.action_play_now(mode="video")
         elif event.button.id == "play-audio-button":
-            await self.action_play_selected(mode="audio")
+            await self.action_play_now(mode="audio")
+        elif event.button.id == "add-queue-button":
+            await self.action_add_to_queue()
+        elif event.button.id == "pause-button":
+            self.action_toggle_pause()
+        elif event.button.id == "next-button":
+            await self.action_skip_next()
+
+    async def action_add_to_queue(self) -> None:
+        table = self.query_one("#video-table", DataTable)
+        row_index = table.cursor_row
+        
+        if row_index is not None and self.videos:
+            video = self.videos[row_index].copy() # Copy biar aman
+            # Default kita kasih audio, tapi lo bisa modif ini biar nanya atau 
+            # ngikutin settingan global
+            video["mode"] = "video" # Misal kita default-kan ke video
+            
+            self.video_queue.append(video)
+            self._update_queue_table()
+
+            if not self.is_playing:
+                await self.play_next_in_queue()
+        
+    async def action_play_now(self, mode: str) -> None:
+        """Fungsi buat muter lagu sekarang juga (Instan Play) tapi tetep dukung queue."""
+        table = self.query_one("#video-table", DataTable)
+        row_index = table.cursor_row
+        
+        if row_index is not None and self.videos:
+            video = self.videos[row_index]
+            # Set is_playing True biar queue otomatis ga nabrak
+            self.is_playing = True
+            await self.start_mpv_process(video, mode=mode)
+
+    def action_toggle_pause(self) -> None:
+        """Toggle pause/resume menggunakan sinyal OS."""
+        import signal
+        import os
+        
+        for proc in self.active_processes:
+            if proc.returncode is None:
+                try:
+                    if not self.is_paused:
+                        os.kill(proc.pid, signal.SIGSTOP) # Freeze proses
+                        self.is_paused = True
+                        self.query_one("#pause-button", Button).label = "▶ Resume"
+                    else:
+                        os.kill(proc.pid, signal.SIGCONT) # Jalanin lagi
+                        self.is_paused = False
+                        self.query_one("#pause-button", Button).label = "|| Pause"
+                except Exception:
+                    pass
+
+    async def action_skip_next(self) -> None:
+        """Bunuh proses, dan biarkan watcher memanggil lagu selanjutnya."""
+        if not self.active_processes:
+            return
+            
+        for proc in self.active_processes:
+            if proc.returncode is None:
+                proc.terminate()
+        
+        # Reset state pause kalo lagi pause
+        self.is_paused = False
+        self.query_one("#pause-button", Button).label = "⏸ Pause"
+        self.query_one("#results-message", Static).update("[yellow]Skipping...[/yellow]")
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle the Enter key press when the search input is focused."""
@@ -148,6 +229,61 @@ class OnceTube(App):
         except Exception:
             pass
 
+    def _update_queue_table(self) -> None:
+        table = self.query_one("#queue-table", DataTable)
+        table.clear()
+        rows = [(str(idx), vid['title']) for idx, vid in enumerate(self.video_queue, 1)]
+        table.add_rows(rows)
+
+    async def play_next_in_queue(self) -> None:
+        """Ambil lagu pertama di queue dan putar sesuai modenya."""
+        if not self.video_queue:
+            self.is_playing = False
+            return
+
+        self.is_playing = True
+        video = self.video_queue.pop(0)
+        self._update_queue_table()
+        
+        mode = video.get("mode", "video") 
+        await self.start_mpv_process(video, mode=mode)
+
+    async def start_mpv_process(self, video: Dict, mode: str = "audio") -> None:
+        """Core function buat jalanin mpv dengan watcher."""
+        video_url = f"https://www.youtube.com/watch?v={video['id']}"
+        cmd = ["mpv", "--no-terminal", "--hwdec=auto", video_url]
+        if mode == "audio":
+            cmd.append("--no-video")
+
+        self.query_one("#results-message", Static).update(f"[cyan]Now Playing:[/cyan] {video['title']}")
+
+        # Bersihin proses lama
+        for proc in self.active_processes:
+            if proc.returncode is None:
+                proc.terminate()
+        self.active_processes.clear()
+
+        # Pake ASYNC biar bisa di-wait
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL
+        )
+        self.active_processes.append(proc)
+
+        # WATCHER: Ini yang bikin Next dan Auto-play jalan
+        async def wait_for_end():
+            await proc.wait()
+            # Kalo proses selesai (baik karena tamat atau di-terminate/skip)
+            # Cek apakah ada antrean
+            if self.video_queue:
+                await self.play_next_in_queue()
+            else:
+                self.is_playing = False
+                self.query_one("#results-message", Static).update("[yellow]Finished. Queue empty.[/yellow]")
+
+        asyncio.create_task(wait_for_end())
+
     def action_clear_search(self) -> None:
         """Reset search input and clear the results table."""
         self.query_one("#search-input", Input).value = ""
@@ -161,8 +297,11 @@ class OnceTube(App):
     def on_unmount(self) -> None:
         """Ensure all child processes are terminated on exit."""
         for proc in self.active_processes:
-            if proc.poll() is None:
-                proc.terminate()
+            if proc.returncode is None: 
+                try:
+                    proc.terminate()
+                except ProcessLookupError:
+                    pass
 
 def main():
     """Main entry point for the application."""
