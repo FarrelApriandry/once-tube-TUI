@@ -41,6 +41,25 @@ Built with **Python**, **Textual**, and **yt-dlp**, with a heavy focus on system
 - **Hardware Acceleration**: Automatically utilizes GPU decoding (`--hwdec=auto`) to keep your CPU cool.
 - **TWICE Themed**: Custom color palette (#FF5FA2, #FCC89B, #FF3B81) for the ultimate aesthetic.
 
+## 📸 Preview
+
+<p align="center">
+  <img src="Documentation-1.png" width="100%" alt="Main Interface">
+</p>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td width="50%" align="center">
+      <img src="Documentation-2.png" width="100%" alt="Search Results">
+    </td>
+    <td width="50%" align="center">
+      <img src="Documentation-3.png" width="100%" alt="Media Playback">
+    </td>
+  </tr>
+</table>
+
+*Capture 1: The main landing interface. Capture 2 & 3: Search functionality and integrated media playback.*
+
 ## 🛠 Engineering & Optimization
 
 As a developer focused on performance and system architecture, this project wasn't just about playing music; it was about solving common TUI bottlenecks:
