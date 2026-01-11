@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build-meta"
+
 [project]
 name = "once-tube"
 version = "0.1.0"
@@ -12,3 +16,6 @@ dependencies = [
 
 [project.scripts]
 once-tube = "once_tube:main"
+
+[tool.setuptools]
+py-modules = ["once_tube"]
