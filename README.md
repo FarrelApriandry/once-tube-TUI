@@ -109,8 +109,6 @@ once-tube
 | Key | Action |
 | --- | --- |
 | `Enter` | Search or Select Video |
-| `V` | Play Video Mode |
-| `A` | Play Audio-Only Mode |
 | `Esc` | Clear search input |
 | `D` | Toggle Dark Mode |
 | `Q` | Quit Application |
