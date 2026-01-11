@@ -9,6 +9,11 @@ Screen {
     color: white;
 }
 
+#left-sidebar {
+    width: 1fr;
+    margin: 0 1;
+}
+
 #app-grid {
     layout: horizontal;
     height: 100%;
@@ -16,23 +21,46 @@ Screen {
 }
 
 #search-area {
-    width: 1fr;    /* Ambil 1 bagian */
+    height: auto;
     border: tall $primary;
     background: #121212;
     padding: 1;
+    margin-bottom: 1;
 }
 
 #results-area {
-    width: 2fr;    /* Ambil 2 bagian (paling lebar) */
+    width: 2fr;
     border: tall $secondary;
     background: #121212;
     padding: 1;
 }
 
 #controls-area {
-    width: 1fr;    /* Ambil 1 bagian */
+    width: 1fr;
     border: tall $primary; 
     padding: 1;
+    margin: 0 1;
+}
+
+/* Lyrics */
+#lyrics-area {
+    height: 1fr;
+    border: tall $accent;
+    background: #0a0a0a;
+    padding: 1;
+}
+
+#lyrics-container {
+    height: 100%;
+    overflow-y: scroll;
+}
+
+#lyrics-text {
+    color: #e0e0e0;
+    text-align: center;
+    width: 100%;
+    height: auto;
+    overflow-y: scroll;
 }
 
 /* Update Playback Controls biar tombolnya beneran sampingan */
@@ -56,13 +84,6 @@ Screen {
 
 #next-button {
     background: $accent;
-}
-
-#results-area {
-    width: 50%;
-    border: tall $secondary;
-    background: #121212;
-    padding: 1;
 }
 
 Static.section-title {

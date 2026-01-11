@@ -1,11 +1,13 @@
 from os import sync
 import subprocess
 import asyncio
+import re
+import syncedlyrics
 from typing import List, Dict
 
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Input, Button, Static, DataTable
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, ScrollableContainer
 from textual.binding import Binding
 
 # --- Global Configurations ---
@@ -37,19 +39,26 @@ class OnceTube(App):
         """Create child widgets for the application."""
         yield Header()
         with Horizontal(id="app-grid"):
-            # Sidebar: Search Input
-            with Vertical(id="search-area"):
-                yield Static("SEARCH VIDEOS", classes="section-title")
-                yield Input(placeholder="Type here...", id="search-input")
-                yield Button("Search", id="search-button")
+            # Sidebar Kiri: Search & Lyrics
+            with Vertical(id="left-sidebar"):
+                with Vertical(id="search-area"):
+                    yield Static("SEARCH VIDEOS", classes="section-title")
+                    yield Input(placeholder="Type here...", id="search-input")
+                    yield Button("Search", id="search-button")
+                
+                with Vertical(id="lyrics-area"):
+                    yield Static("LYRICS", classes="section-title")
+                    yield Static("Lyrics will appear here...", id="lyrics-text", expand=True)
+                    # with ScrollableContainer(id="lyrics-container"):
+                    #     yield Static("Lyrics will appear here when playing...", id="lyrics-text")
             
-            # Main Content: Results Table
+            # Main Content
             with Vertical(id="results-area"):
                 yield Static("TWICE LIBRARY", classes="section-title")
                 yield Static("Search results will appear here.", id="results-message")
                 yield DataTable(id="video-table")
 
-            # Sidebar: Player Controls & Queue
+            # Sidebar Kanan: Controls & Queue
             with Vertical(id="controls-area"):
                 yield Static("MEDIA PLAYER", classes="section-title")
                 yield Button("▶ Play Video", id="play-video-button")
@@ -63,6 +72,43 @@ class OnceTube(App):
                     yield Button("⏸ Pause", id="pause-button")
                     yield Button("⏭ Next", id="next-button")
         yield Footer()
+
+    # --- LYRICS LOGIC ---
+    def clean_video_title(self, title: str) -> str:
+        """Membersihkan judul video agar pencarian lirik akurat."""
+        # Hapus teks dalam kurung/bracket (Official MV, Lyrics, dll)
+        title = re.sub(r'[\(\[].*?[\)\]]', '', title)
+        # Hapus keyword umum yang ganggu pencarian
+        garbage = ["M/V", "Official", "Music Video", "TWICE", "MV", "Lyrics", "HD", "4K", '"']
+        for word in garbage:
+            title = re.compile(re.escape(word), re.IGNORECASE).sub('', title)
+        return title.strip()
+
+    async def fetch_lyrics(self, title: str):
+        """Mencari lirik di background agar TUI tidak freeze."""
+        lyrics_widget = self.query_one("#lyrics-text", Static)
+        clean_name = self.clean_video_title(title)
+        
+        lyrics_widget.update(f"[yellow]Searching lyrics for:[/yellow]\n[bold]{clean_name}[/bold]...")
+        
+        def get_lrc():
+            try:
+                # Tambahin "TWICE" biar hasilnya spesifik
+                return syncedlyrics.search(f"{clean_name} TWICE")
+            except:
+                return None
+
+        # Jalankan di thread berbeda biar gak blocking
+        loop = asyncio.get_event_loop()
+        lrc = await loop.run_in_executor(None, get_lrc)
+
+        if lrc:
+            # Hapus timestamp [00:00.00] kalau mau lirik bersih, 
+            # atau biarkan kalau mau gaya karaoke
+            clean_lrc = re.sub(r'\[.*?\]', '', lrc)
+            lyrics_widget.update(clean_lrc.strip())
+        else:
+            lyrics_widget.update("[red]Lyrics not found for this song.[/red]")
 
     async def on_mount(self) -> None:
         """Initialize components on application startup."""
@@ -256,6 +302,9 @@ class OnceTube(App):
             cmd.append("--no-video")
 
         self.query_one("#results-message", Static).update(f"[cyan]Now Playing:[/cyan] {video['title']}")
+
+        # Fetch lyrics in background
+        asyncio.create_task(self.fetch_lyrics(video['title']))
 
         # Bersihin proses lama
         for proc in self.active_processes:
