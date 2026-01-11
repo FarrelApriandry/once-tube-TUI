@@ -52,7 +52,6 @@ Screen {
 
 #lyrics-container {
     height: 100%;
-    overflow-y: scroll;
 }
 
 #lyrics-text {

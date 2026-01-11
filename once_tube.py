@@ -48,9 +48,9 @@ class OnceTube(App):
                 
                 with Vertical(id="lyrics-area"):
                     yield Static("LYRICS", classes="section-title")
-                    yield Static("Lyrics will appear here...", id="lyrics-text", expand=True)
-                    # with ScrollableContainer(id="lyrics-container"):
-                    #     yield Static("Lyrics will appear here when playing...", id="lyrics-text")
+                    # yield Static("Lyrics will appear here...", id="lyrics-text", expand=True)
+                    with ScrollableContainer(id="lyrics-container"):
+                        yield Static("Lyrics will appear here when playing...", id="lyrics-text")
             
             # Main Content
             with Vertical(id="results-area"):
@@ -75,11 +75,10 @@ class OnceTube(App):
 
     # --- LYRICS LOGIC ---
     def clean_video_title(self, title: str) -> str:
-        """Membersihkan judul video agar pencarian lirik akurat."""
-        # Hapus teks dalam kurung/bracket (Official MV, Lyrics, dll)
+        """Cleaning video title for more accuracy searching."""
         title = re.sub(r'[\(\[].*?[\)\]]', '', title)
-        # Hapus keyword umum yang ganggu pencarian
-        garbage = ["M/V", "Official", "Music Video", "TWICE", "MV", "Lyrics", "HD", "4K", '"']
+
+        garbage = ["M/V", "Official", "Music Video", "MV", "HD", "4K", '"']
         for word in garbage:
             title = re.compile(re.escape(word), re.IGNORECASE).sub('', title)
         return title.strip()
