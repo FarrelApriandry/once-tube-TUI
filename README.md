@@ -1,4 +1,25 @@
+<!-- # 🍭 ONCE-TUBE
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td width="70%" valign="middle">
+      <p><b>ONCE-TUBE</b> is a high-performance Terminal User Interface (TUI) built for TWICE fans (ONCE) and terminal enthusiasts. It allows you to search and stream YouTube videos or audio-only directly from your terminal with a sleek, magenta-themed aesthetic.</p>
+      <p>- Built with <b>Python</b>, <b>Textual</b>, and <b>yt-dlp</b>, with a heavy focus on system efficiency and low resource consumption.</p>
+    </td>
+    <th width="30%" align="center" valign="middle">
+      <img src="Jihyo.png" width="200px" alt="Park Jihyo">
+    </th>
+  </tr>
+</table>
+
+![License](https://img.shields.io/badge/license-MIT-magenta)
+![Python](https://img.shields.io/badge/python-3.12+-blue)
+![Bias](https://img.shields.io/badge/Bias-Jihyo-pink)
+
+-->
 # 🍭 ONCE-TUBE
+
+<img src="Jihyo.png" align="right" width="300" alt="Park Jihyo">
 
 **ONCE-TUBE** is a high-performance Terminal User Interface (TUI) built for TWICE fans (ONCE) and terminal enthusiasts. It allows you to search and stream YouTube videos or audio-only directly from your terminal with a sleek, magenta-themed aesthetic.
 
@@ -7,6 +28,10 @@ Built with **Python**, **Textual**, and **yt-dlp**, with a heavy focus on system
 ![License](https://img.shields.io/badge/license-MIT-magenta)
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![Bias](https://img.shields.io/badge/Bias-Jihyo-pink)
+
+<br clear="right"/>
+
+---
 
 ## ✨ Features
 
@@ -37,7 +62,7 @@ Make sure you have these system dependencies installed:
 If you use [uv](https://github.com/astral-sh/uv), just clone and run:
 
 ```bash
-git clone [https://github.com/FarrelApriandry/once-tube.git](https://github.com/FarrelApriandry/once-tube.git)
+git clone [https://github.com/FarrelApriandry/once-tube-TUI.git](https://github.com/FarrelApriandry/once-tube-TUI.git)
 cd once-tube
 uv pip install -e .
 once-tube
