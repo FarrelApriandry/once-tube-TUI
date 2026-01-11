@@ -1,0 +1,108 @@
+/* once_tube.tcss */
+
+$primary: #FF5FA2;   /* TWICE Magenta */
+$secondary: #FCC89B; /* TWICE Apricot */
+$accent: #FF3B81;    /* Deep Pink */
+
+Screen {
+    background: #0D0D0D;
+    color: white;
+}
+
+#app-grid {
+    layout: horizontal;
+    height: 100%;
+    padding: 1 2;
+}
+
+/* Sidebar Kiri & Kanan */
+#search-area, #controls-area {
+    width: 25%;
+    border: tall $primary;
+    background: #121212;
+    padding: 1;
+    margin: 0 1;
+}
+
+/* Area Tengah (Tabel) */
+#results-area {
+    width: 50%;
+    border: tall $secondary;
+    background: #121212;
+    padding: 1;
+}
+
+/* Header Text di tiap section */
+Static.section-title {
+    content-align: center middle;
+    width: 100%;
+    background: $accent;
+    color: white;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+Input {
+    height: 3;
+    border: tall $secondary;
+    color: white;
+    margin-bottom: 1;
+    width: 100%;
+}
+
+Button {
+    width: 100%;
+    height: 3;         /* Lock tinggi button sama dengan Input */
+    margin-bottom: 1;
+    border: tall transparent; /* Reserve space buat border */
+    color: white;
+    text-align: center;
+}
+
+#search-button {
+    background: $primary;
+}
+
+#play-video-button {
+    background: $accent;
+}
+
+#play-audio-button {
+    background: $secondary;
+    color: black;
+}
+
+/* HOVER STATE - Tidak akan ngerubah ukuran lagi */
+Button:hover {
+    border: tall white;
+    text-style: bold;
+    /* brightness: 120%; Optional effect */
+}
+
+#play-audio-button:hover {
+    color: white;
+}
+
+/* Tabel Styling */
+DataTable {
+    border: solid $primary;
+    height: 1fr;
+    margin-top: 1;
+}
+
+DataTable > .datatable--header {
+    background: $accent;
+    color: white;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: $primary 40%;
+    color: white;
+    text-style: italic;
+}
+
+Footer {
+    background: $primary;
+    color: white;
+}
