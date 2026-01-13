@@ -34,6 +34,8 @@ class OnceTube(App):
     video_queue: List[Dict[str, str]] = []
     is_playing: bool = False
     is_paused: bool = False
+    current_page = 1
+    page_result = 20
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the application."""
@@ -57,6 +59,11 @@ class OnceTube(App):
                 yield Static("TWICE LIBRARY", classes="section-title")
                 yield Static("Search results will appear here.", id="results-message")
                 yield DataTable(id="video-table")
+                # Pagination Controls
+                with Horizontal(id="pagination-area"):
+                    yield Button("⬅ Previous", id="prev-page-button")
+                    yield Static(f" Page {self.current_page} ", id="page-indicator")
+                    yield Button("Next ➡", id="next-page-button")
 
             # Sidebar Kanan: Controls & Queue
             with Vertical(id="controls-area"):
@@ -132,6 +139,13 @@ class OnceTube(App):
             self.action_toggle_pause()
         elif event.button.id == "next-button":
             await self.action_skip_next()
+        elif event.button.id == "next-page-button":
+            await self.action_perform_search(page=self.current_page + 1)
+            self.query_one("#page-indicator", Static).update(f"Page {self.current_page}")
+        elif event.button.id == "prev-page-button":
+            if self.current_page > 1:
+                await self.action_perform_search(page=self.current_page - 1)
+                self.query_one("#page-indicator", Static).update(f"Page {self.current_page}")
 
     async def action_add_to_queue(self) -> None:
         table = self.query_one("#video-table", DataTable)
@@ -198,18 +212,27 @@ class OnceTube(App):
         if event.input.id == "search-input":
             await self.action_perform_search()
 
-    async def action_perform_search(self) -> None:
+    async def action_perform_search(self, page: int = 1) -> None:
         """Asynchronously fetch search results from YouTube using yt-dlp."""
         search_query = self.query_one("#search-input", Input).value
         if not search_query:
             return
 
+        self.current_page = page
+
+        start_idx = ((page - 1) * self.page_result) + 1
+        end_idx = page * self.page_result
+        
         msg_widget = self.query_one("#results-message", Static)
-        msg_widget.update("[magenta]Searching YouTube...[/magenta]")
+        msg_widget.update(f"[magenta]Searching Page {page} (Results {start_idx}-{end_idx})...[/magenta]")
         
         try:
-            # Limits search to top 15 results for optimal responsiveness
-            cmd = YTDL_CMD + [f"ytsearch15:{search_query}"]
+            cmd = [
+                "yt-dlp", "--get-title", "--get-id", "--flat-playlist",
+                f"--playlist-items", f"{start_idx}:{end_idx}",
+                f"ytsearch{end_idx}:{search_query}"
+            ]
+            
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
@@ -218,19 +241,20 @@ class OnceTube(App):
             stdout, _ = await process.communicate()
             
             result = stdout.decode().splitlines()
-            self.videos = []
             
-            # Parsing yt-dlp output (Title followed by ID)
+            # Parse result (still title & id)
+            new_videos = []
             for i in range(0, len(result), 2):
                 if i + 1 < len(result):
-                    self.videos.append({"title": result[i], "id": result[i+1]})
+                    new_videos.append({"title": result[i], "id": result[i+1]})
 
-            if not self.videos:
-                msg_widget.update("[red]No videos found.[/red]")
+            if not new_videos:
+                msg_widget.update("[red]No more videos found.[/red]")
             else:
-                msg_widget.update(f"[green]Found {len(self.videos)} videos.[/green]")
+                self.videos = new_videos # Replace content of the table with a new page of results
+                msg_widget.update(f"[green]Page {page} Loaded.[/green]")
                 self._update_results_table()
-
+                
         except Exception as e:
             msg_widget.update(f"[red]Error: {str(e)}[/red]")
 
@@ -240,7 +264,8 @@ class OnceTube(App):
         table.clear()
         
         # Performance optimization: Use add_rows for bulk updates to minimize CPU overhead
-        rows = [(str(idx), vid['title']) for idx, vid in enumerate(self.videos, 1)]
+        start_num = ((self.current_page - 1) * self.page_result) + 1
+        rows = [(str(idx), vid['title']) for idx, vid in enumerate(self.videos, start_num)]
         table.add_rows(rows)
 
     async def action_play_selected(self, mode: str = "video") -> None:

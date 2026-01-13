@@ -27,7 +27,7 @@ Built with **Python**, **Textual**, and **yt-dlp**, with a heavy focus on system
 
 ![License](https://img.shields.io/badge/license-MIT-magenta)
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
-![Bias](https://img.shields.io/badge/Bias-Jihyo-pink)
+![Bias](https://img.shields.io/badge/bias-Jihyo-pink)
 
 <br clear="right"/>
 

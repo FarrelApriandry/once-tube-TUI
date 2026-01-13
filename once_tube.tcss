@@ -35,6 +35,33 @@ Screen {
     padding: 1;
 }
 
+# Pagination Area
+#pagination-area {
+    height: 3;
+    width: 100%;
+    align: center middle;
+    layout: horizontal;
+    margin-top: 1;
+    background: #1a1a1a;
+}
+
+#pagination-area Button {
+    width: 15;
+    margin: 0 1;
+}
+
+#page-indicator {
+    width: auto;
+    content-align: center middle;
+    color: $secondary;
+    text-style: bold;
+    padding: 0 2;
+}
+
+#video-table {
+    height: 1fr;
+}
+
 #controls-area {
     width: 1fr;
     border: tall $primary; 
